@@ -29,7 +29,7 @@ This guide explains how to deploy the rsvp-server as a separate Vercel project.
 
 4. **Set Environment Variables**
    - Go to Project Settings → Environment Variables
-   - Add: `MONGODB_URI` = `mongodb+srv://justinejusi98_db_user:QMXbwUXOrYvXPHMo@rsvp.porkr0i.mongodb.net`
+   - Add: `MONGODB_URI` = `mongodb+srv://justinejusi98_db_user:QMXbwUXOrYvXPHMo@rsvp.porkr0i.mongodb.net/admin`
    - Apply to: Production, Preview, Development
 
 5. **Deploy**

@@ -85,7 +85,7 @@ This server should be deployed as a **separate Vercel project**.
    - Or deploy from the `rsvp-server` folder directly
 
 2. **Set Environment Variables** in Vercel:
-   - `MONGODB_URI` = `mongodb+srv://justinejusi98_db_user:QMXbwUXOrYvXPHMo@rsvp.porkr0i.mongodb.net`
+   - `MONGODB_URI` = `mongodb+srv://justinejusi98_db_user:QMXbwUXOrYvXPHMo@rsvp.porkr0i.mongodb.net/admin`
 
 3. **Deploy**:
    - Vercel will automatically detect the `api/` directory
