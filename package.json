@@ -5,7 +5,7 @@
   "description": "Backend API server for RSVP management",
   "main": "index.js",
   "engines": {
-    "node": "18.x"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "node --watch index.js",
