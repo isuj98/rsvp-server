@@ -16,18 +16,21 @@ export default async function handler(req, res) {
     try {
       const { db } = await connectToDatabase();
       // Test connection by running a simple query
-      await db.collection('admin').findOne({});
+      await db.admin().ping();
       
       return res.json({ 
         status: 'ok', 
         database: 'connected', 
-        timestamp: new Date().toISOString() 
+        timestamp: new Date().toISOString(),
+        mongodbUri: process.env.MONGODB_URI ? 'set' : 'missing'
       });
     } catch (error) {
+      console.error('Health check error:', error);
       return res.status(500).json({ 
         status: 'error', 
         database: 'disconnected',
-        error: error.message 
+        error: error.message,
+        mongodbUri: process.env.MONGODB_URI ? 'set' : 'missing'
       });
     }
   }

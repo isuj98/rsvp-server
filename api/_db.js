@@ -13,18 +13,36 @@ let cachedDb = null;
 
 export async function connectToDatabase() {
   // In serverless environments, reuse connections when possible
+  // But check if connection is still alive
   if (cachedClient && cachedDb) {
-    return { client: cachedClient, db: cachedDb };
+    try {
+      // Ping the database to check if connection is still alive
+      await cachedDb.admin().ping();
+      return { client: cachedClient, db: cachedDb };
+    } catch (error) {
+      // Connection is dead, reset cache
+      console.log('Cached connection is dead, creating new connection');
+      cachedClient = null;
+      cachedDb = null;
+    }
   }
 
   try {
+    if (!MONGODB_URI) {
+      throw new Error('MONGODB_URI environment variable is not set');
+    }
+
     const client = await MongoClient.connect(MONGODB_URI, {
       maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
+      connectTimeoutMS: 10000,
     });
 
     const db = client.db(DB_NAME);
+    
+    // Test the connection
+    await db.admin().ping();
 
     cachedClient = client;
     cachedDb = db;
@@ -32,7 +50,17 @@ export async function connectToDatabase() {
     return { client, db };
   } catch (error) {
     console.error('MongoDB connection error:', error);
-    throw error;
+    console.error('Error details:', {
+      message: error.message,
+      name: error.name,
+      stack: error.stack
+    });
+    
+    // Reset cache on error
+    cachedClient = null;
+    cachedDb = null;
+    
+    throw new Error(`Failed to connect to MongoDB: ${error.message}`);
   }
 }
 

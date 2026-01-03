@@ -31,6 +31,7 @@ This guide explains how to deploy the rsvp-server as a separate Vercel project.
    - Go to Project Settings → Environment Variables
    - Add: `MONGODB_URI` = `mongodb+srv://justinejusi98_db_user:QMXbwUXOrYvXPHMo@rsvp.porkr0i.mongodb.net/admin`
    - Apply to: Production, Preview, Development
+   - **CRITICAL**: Make sure this is set correctly or functions will crash!
 
 5. **Deploy**
    - Click "Deploy"
@@ -62,6 +63,7 @@ This guide explains how to deploy the rsvp-server as a separate Vercel project.
    ```bash
    vercel env add MONGODB_URI
    # Paste your MongoDB connection string when prompted
+   # Use: mongodb+srv://justinejusi98_db_user:QMXbwUXOrYvXPHMo@rsvp.porkr0i.mongodb.net/admin
    ```
 
 6. **Deploy to Production**:
@@ -75,14 +77,18 @@ This guide explains how to deploy the rsvp-server as a separate Vercel project.
    - Your API will be available at: `https://your-project-name.vercel.app`
    - API endpoints: `https://your-project-name.vercel.app/api/*`
 
-2. **Update Frontend Configuration**
+2. **Test the Health Endpoint**
+   - Visit: `https://your-project-name.vercel.app/api/health`
+   - Should return: `{"status":"ok","database":"connected",...}`
+   - If it shows an error, check:
+     - Environment variable `MONGODB_URI` is set
+     - MongoDB connection string is correct
+     - MongoDB network access allows Vercel IPs
+
+3. **Update Frontend Configuration**
    - Update `utils/apiConfig.ts` in the frontend project
    - Set `VITE_API_URL` environment variable in frontend Vercel project
    - Or update the production URL in `apiConfig.ts`
-
-3. **Test the API**
-   - Visit: `https://your-project-name.vercel.app/api/health`
-   - Should return: `{"status":"ok","database":"connected",...}`
 
 ## API Endpoints
 
@@ -101,19 +107,44 @@ Once deployed, your API will be available at:
 - Verify `vercel.json` configuration
 
 ### MongoDB Connection Errors
-- Verify `MONGODB_URI` environment variable is set correctly
-- Check MongoDB network access (IP whitelist)
-- Ensure MongoDB connection string includes database name
+- **Most Common Issue**: `MONGODB_URI` environment variable not set in Vercel
+- Verify `MONGODB_URI` environment variable is set correctly in Vercel project settings
+- Check MongoDB network access (IP whitelist) - MongoDB Atlas allows all IPs by default (0.0.0.0/0)
+- Ensure MongoDB connection string includes `/admin` at the end
+- Check Vercel function logs for detailed error messages
 
 ### CORS Errors
 - All API functions include CORS headers
 - If issues persist, check frontend API URL configuration
 
+### Function Crashes
+- Check Vercel function logs in the dashboard
+- Verify `MONGODB_URI` is set in environment variables
+- Check that MongoDB connection string is correct
+- Ensure Node.js version is set to 24.x in `package.json`
+
 ## Environment Variables
 
 Required:
-- `MONGODB_URI` - MongoDB connection string
+- `MONGODB_URI` - MongoDB connection string (must include `/admin` at the end)
+  - Format: `mongodb+srv://username:password@cluster.mongodb.net/admin`
 
 Optional:
 - `DB_NAME` - Database name (defaults to 'rsvp')
 
+## Debugging Tips
+
+1. **Check Function Logs**:
+   - Go to Vercel Dashboard → Your Project → Functions
+   - Click on a function to see logs
+   - Look for error messages
+
+2. **Test Health Endpoint**:
+   - Visit `/api/health` endpoint
+   - Check if `mongodbUri` shows "set" or "missing"
+   - This will tell you if the environment variable is configured
+
+3. **Verify Environment Variables**:
+   - Go to Project Settings → Environment Variables
+   - Ensure `MONGODB_URI` is set for all environments
+   - Make sure there are no extra spaces or quotes
