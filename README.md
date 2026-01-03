@@ -23,6 +23,13 @@ npm run init-admin
 
 This creates a default admin user (username: `admin`, password: `JohnseanKristine2026`).
 
+5. Migrate guestlist data from JSON to MongoDB (optional):
+```bash
+npm run migrate-guestlist
+```
+
+This will transfer all guests from `guestlist.json` to the MongoDB database.
+
 ## Running
 
 Development mode:
@@ -47,6 +54,7 @@ npm start
 ### Guestlist
 - `GET /api/guestlist` - Get all guests
 - `POST /api/guestlist` - Add new guests
+- `POST /api/guestlist/import` - Import guestlist (merge with existing)
 - `PUT /api/guestlist` - Update entire guestlist
 - `DELETE /api/guestlist/:name` - Delete guest
 

@@ -82,6 +82,58 @@ router.put('/', async (req, res) => {
   }
 });
 
+// POST import guestlist (merge with existing, avoid duplicates)
+router.post('/import', async (req, res) => {
+  try {
+    const db = req.app.locals.db;
+    const { guestlist, replace } = req.body;
+    
+    if (!Array.isArray(guestlist)) {
+      return res.status(400).json({ error: 'Expected an array of guest names' });
+    }
+    
+    // Get existing guests
+    const existingGuests = await db.collection('guestlist').find({}).toArray();
+    const existingNames = new Set(existingGuests.map(g => g.name.toLowerCase()));
+    
+    if (replace) {
+      // Replace all existing guests
+      await db.collection('guestlist').deleteMany({});
+    }
+    
+    // Filter out duplicates and prepare new guests
+    const newGuests = guestlist
+      .map(name => name.trim())
+      .filter(name => name.length > 0)
+      .filter(name => !existingNames.has(name.toLowerCase()))
+      .map(name => ({
+        name: name,
+        createdAt: new Date().toISOString(),
+        imported: true
+      }));
+    
+    let insertedCount = 0;
+    if (newGuests.length > 0) {
+      const result = await db.collection('guestlist').insertMany(newGuests);
+      insertedCount = result.insertedCount;
+    }
+    
+    // Return updated list
+    const updatedList = await db.collection('guestlist').find({}).toArray();
+    const names = updatedList.map(g => g.name).sort();
+    
+    res.json({
+      success: true,
+      total: names.length,
+      added: insertedCount,
+      guestlist: names
+    });
+  } catch (error) {
+    console.error('Error importing guestlist:', error);
+    res.status(500).json({ error: 'Failed to import guestlist' });
+  }
+});
+
 // DELETE guest by name
 router.delete('/:name', async (req, res) => {
   try {
