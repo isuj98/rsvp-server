@@ -4,6 +4,9 @@
   "type": "module",
   "description": "Backend API server for RSVP management",
   "main": "index.js",
+  "engines": {
+    "node": "18.x"
+  },
   "scripts": {
     "dev": "node --watch index.js",
     "start": "node index.js",
